@@ -4,7 +4,6 @@
 #include <fcntl.h> // open()
 #include <linux/i2c-dev.h> // I2C_SLAVE
 #include <stdint.h>
-#include <string.h> // strerror()
 #include <sys/ioctl.h> // ioctl()
 #include <unistd.h> // read(), write()
 
