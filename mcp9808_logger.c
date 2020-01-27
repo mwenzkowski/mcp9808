@@ -31,7 +31,7 @@ create_influxdb_curl_handle()
 	return curl;
 }
 
-bool
+void
 insert_temp(CURL *curl, float temp, struct timespec timestamp)
 {
 	assert(curl);
@@ -49,9 +49,7 @@ insert_temp(CURL *curl, float temp, struct timespec timestamp)
 		fprintf(stderr,
 			"Fehler: Senden der Temperatur an die Datenbank"
 			" fehlgeschlagen (%s)\n", curl_easy_strerror(res));
-		return false;
 	}
-	return true;
 }
 
 
@@ -63,22 +61,23 @@ int main()
 	setlinebuf(stdout);
 	setlinebuf(stderr);
 
-	if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
-		fprintf(stderr, "Initialisierung von curl fehlgeschlagen!\n");
-		return 1;
+	while (curl_global_init(CURL_GLOBAL_ALL) != 0) {
+		fprintf(stderr, "Initialisierung von curl fehlgeschlagen! "
+			"Neuer Versuch in 5 Sekunden\n");
+		sleep(5);
+	}
+
+	CURL *curl;
+	while ((curl = create_influxdb_curl_handle()) == NULL) {
+		fprintf(stderr, "Erstellen des curl-Handles fehlgeschlagen! "
+			"Neuer Versuch in 5 Sekunden\n");
+		sleep(5);
 	}
 
 	char *i2c_bus = "/dev/i2c-1";
-	unsigned int slave_addr = 0x18; 
+	unsigned int slave_addr = 0x18;
 
 	for (;;) {
-
-		CURL *curl = create_influxdb_curl_handle();
-		if (curl == NULL) {
-			fprintf(stderr, "Erstellen des curl-Handles fehlgeschlagen!\n");
-			sleep(5);
-			continue;
-		}
 
 		int fd = mcp9808_open(i2c_bus, slave_addr);
 		if (fd < 0) {
@@ -88,7 +87,7 @@ int main()
 			continue;
 		}
 			
-		float temp=0;
+		float temp;
 		struct timespec timestamp;
 
 		for (;;) {
@@ -101,14 +100,11 @@ int main()
 				break;
 			}
 
-			if (!insert_temp(curl, temp, timestamp)) {
-				break;
-			}
+			insert_temp(curl, temp, timestamp);
 			sleep(5);
 		}
 
-		sleep(5);
-		curl_easy_cleanup(curl);
 		close(fd);
+		sleep(5);
 	}
 }
