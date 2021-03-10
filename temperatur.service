@@ -1,0 +1,10 @@
+[Unit]
+Description=Temperatur auslesen
+Requires=influxdb.service
+After=influxdb.service
+
+[Service]
+ExecStart=/home/maximilian/mcp9808/mcp9808_logger
+
+[Install]
+WantedBy=multi-user.target
