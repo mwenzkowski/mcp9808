@@ -20,4 +20,4 @@ mcp9808_logger.o: mcp9808.h
 
 .PHONY:
 clean:
-	rm *.o mcp9808_info gärbox
+	rm *.o mcp9808_info mcp9808_logger gärbox
