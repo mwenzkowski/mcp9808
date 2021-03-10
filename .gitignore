@@ -1,1 +1,4 @@
 *.o
+gärbox
+mcp9808_logger
+mcp9808_info
