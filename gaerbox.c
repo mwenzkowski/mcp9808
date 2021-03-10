@@ -23,7 +23,11 @@ main(int argc, const char *args[])
 {
 	const char *I2C_BUS = "/dev/i2c-1";
 	const unsigned int SLAVE_ADDR = 0x18; 
+
+	// file descriptor which is used to communicate with the mcp9808 device
 	int fd;
+
+	// the target temperature in °C (-40 °C is the lowest valid temperature)
 	float temp = -40.0f;
 
 	if (argc != 2) {
@@ -32,7 +36,7 @@ main(int argc, const char *args[])
 	}
 
 
-	// args[1] != "aus"
+	// If the first argument is not "aus" try to parse the target temperature
 	if (strcmp(args[1], "aus") != 0) {
 		char *endptr = NULL;
 		temp = strtof(args[1], &endptr);
