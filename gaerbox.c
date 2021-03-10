@@ -21,8 +21,8 @@ printUsage(void)
 int
 main(int argc, const char *args[])
 {
-	char *i2c_bus = "/dev/i2c-1";
-	unsigned int slave_addr = 0x18; 
+	const char *I2C_BUS = "/dev/i2c-1";
+	const unsigned int SLAVE_ADDR = 0x18; 
 	int fd;
 	float temp = -40.0f;
 
@@ -47,7 +47,7 @@ main(int argc, const char *args[])
 	}
 
 
-	fd = mcp9808_open(i2c_bus, slave_addr);
+	fd = mcp9808_open(I2C_BUS, SLAVE_ADDR);
 	if (fd < 0) {
 		fprintf(stderr, "Öffnen des MCP9808 fehlgeschlagen: %s\n", strerror(errno));
 		return EXIT_FAILURE;
