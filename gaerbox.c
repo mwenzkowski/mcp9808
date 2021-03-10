@@ -1,8 +1,8 @@
-// Copyright © 2020 Maximilian Wenzkowski
+// Copyright © 2021 Maximilian Wenzkowski
 
 #include <errno.h> // errno
 #include <stdio.h>
-#include <stdlib.h> // strtof()
+#include <stdlib.h> // strtof(), EXIT_FAILURE, EXIT_SUCCESS
 #include <string.h> // strerror()
 
 #include "mcp9808.h"
@@ -28,7 +28,7 @@ main(int argc, const char *args[])
 
 	if (argc != 2) {
 		printUsage();
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 
@@ -39,10 +39,10 @@ main(int argc, const char *args[])
 
 		if (endptr == args[1]) {
 			fprintf(stderr, "Fehler: Temperatur ungültig\n");
-			return 1;
+			return EXIT_FAILURE;
 		} else if (temp < -40.0f || temp > 125.0f) {
 			fprintf(stderr, "Fehler: Temperatur außerhalb von [-40 °C, 125.0 °C]\n");
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -50,7 +50,7 @@ main(int argc, const char *args[])
 	fd = mcp9808_open(i2c_bus, slave_addr);
 	if (fd < 0) {
 		fprintf(stderr, "Öffnen des MCP9808 fehlgeschlagen: %s\n", strerror(errno));
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	struct mcp9808_config config;
@@ -58,19 +58,19 @@ main(int argc, const char *args[])
 		fprintf(stderr, "Lesen der Konfiguration fehlgeschlagen: %s\n",
 			strerror(errno));
 		close(fd);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (config.critical_temp_locked) {
 			fprintf(stderr, "Fehler: Sperrung des kritische Temperaturwerts "
 				"aktiv.\n");
 			close(fd);
-			return 1;
+			return EXIT_FAILURE;
 	}
 	if (config.temp_window_locked) {
 			fprintf(stderr, "Fehler: Sperrung des Temperaturintervalls aktiv.\n");
 			close(fd);
-			return 1;
+			return EXIT_FAILURE;
 	}
 
 	config.alert_mode = MCP_9808_COMPARATOR_OUTPUT;
@@ -84,7 +84,7 @@ main(int argc, const char *args[])
 		fprintf(stderr, "Setzen der Konfiguration fehlgeschlagen: %s\n",
 			strerror(errno));
 		close(fd);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (mcp9808_set_critical_temp(fd, temp) < 0) {
@@ -92,7 +92,7 @@ main(int argc, const char *args[])
 			"Setzen des kritischen Temperaturwerts fehlgeschlagen: %s\n",
 			strerror(errno));
 		close(fd);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (mcp9808_set_resolution(fd, MCP_9808_RES_0_0625) < 0) {
@@ -100,11 +100,11 @@ main(int argc, const char *args[])
 			"Setzen des kritischen Temperaturwerts fehlgeschlagen: %s\n",
 			strerror(errno));
 		close(fd);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	printf("Eingestellte Temperatur: %.2f °C\n", temp);
 	
 	close(fd);
-	return 0;
+	return EXIT_SUCCESS;
 }
